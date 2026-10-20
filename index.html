@@ -117,6 +117,8 @@ nav.tabs button[aria-current="page"]{color:var(--blue);background:var(--blue-sof
 #s-splash{min-height:100%}
 #s-splash,#s-welcome,#s-login{gap:0}
 #s-splash{min-height:100%}
+#s-splash,#s-welcome,#s-login{gap:0}
+#s-splash{min-height:100%}
 /* welcome / login */
 .pad{padding:20px 16px 28px;display:flex;flex-direction:column;gap:16px}
 .welcome .logo-card{background:#fff;border-radius:22px;padding:14px 18px;align-self:center;box-shadow:0 6px 24px rgba(10,40,70,.12);border:1px solid var(--line)}
@@ -562,7 +564,7 @@ a.btn{text-decoration:none;text-align:center}
   var SCREENS = ['splash','welcome','login','home','appointments','book','done','info','clinics','ask','tutor','study','topic','quiz','cases','case','history','profile','support','upgrade'];
   var BARE = {splash:1, welcome:1, login:1};
   var NEEDS_AUTH = {appointments:1, book:1, ask:1, tutor:1, history:1, profile:1};
-  var ROOTS = {patient:['home','appointments','info','profile'], student:['tutor','profile']};
+  var ROOTS = {patient:['home','appointments','info','profile'], student:['home','tutor','study','profile']};
   var TABOF = {done:'appointments', book:'appointments', clinics:'info', ask:'home', topic:'study', quiz:'study', cases:'study', case:'study', history:'home', support:'profile', upgrade:'profile'};
   var TABLABEL = {home:['home','Home'], appointments:['calendar','Appointments'], info:['info','Info'], profile:['user','Profile'], tutor:['chat','Ask Eyelink AI'], study:['book','Study']};
   var stack = [], cur = {name:'splash'};
@@ -592,10 +594,10 @@ a.btn{text-decoration:none;text-align:center}
     chrome(name);
     $('main').scrollTop = 0;
   }
-  var STUDENT_OK = {tutor:1, profile:1, support:1, upgrade:1, login:1, welcome:1, splash:1};
+  var STUDENT_OK = {home:1, tutor:1, study:1, topic:1, quiz:1, cases:1, case:1, history:1, profile:1, support:1, upgrade:1, login:1, welcome:1, splash:1};
   var PATIENT_BLOCK = {tutor:1, study:1, topic:1, quiz:1, cases:1, case:1, history:1};
   function go(name, arg){
-    if (isStudent() && !STUDENT_OK[name]) { name = 'tutor'; arg = undefined; }
+    if (isStudent() && !STUDENT_OK[name]) { name = 'home'; arg = undefined; }
     else if (!isStudent() && PATIENT_BLOCK[name]) { name = 'home'; arg = undefined; }
     if (NEEDS_AUTH[name] && !S.session) { S.after = {name:name, arg:arg}; return go('login'); }
     var root = BARE[name] || rootsFor().indexOf(name) > -1;
@@ -606,7 +608,7 @@ a.btn{text-decoration:none;text-align:center}
   window.addEventListener('popstate', function(){
     if (stack.length > 1) { stack.pop(); var t = stack[stack.length-1]; render(t.name, t.arg); }
   });
-  function back(){ if (stack.length > 1) { try { history.back(); } catch(e){ stack.pop(); var t = stack[stack.length-1]; render(t.name, t.arg); } } else { go(isStudent() ? 'tutor' : 'home'); } }
+  function back(){ if (stack.length > 1) { try { history.back(); } catch(e){ stack.pop(); var t = stack[stack.length-1]; render(t.name, t.arg); } } else { go('home'); } }
   function sub(title){ return '<div class="subhead"><button class="back" type="button" data-act="back" aria-label="Back">'+ico('back',22)+'</button><h2>'+esc(title)+'</h2></div>'; }
   function say(id, text, ok){ var el = $(id); if (el) el.innerHTML = '<div class="'+(ok?'ok':'err')+'">'+esc(text)+'</div>'; }
   function firstName(){ return (S.profile.full_name || '').trim().split(' ')[0]; }
