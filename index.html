@@ -113,6 +113,10 @@ nav.tabs button[aria-current="page"]{color:var(--blue);background:var(--blue-sof
 #s-splash{min-height:100%}
 #s-splash,#s-welcome,#s-login{gap:0}
 #s-splash{min-height:100%}
+#s-splash,#s-welcome,#s-login{gap:0}
+#s-splash{min-height:100%}
+#s-splash,#s-welcome,#s-login{gap:0}
+#s-splash{min-height:100%}
 /* welcome / login */
 .pad{padding:20px 16px 28px;display:flex;flex-direction:column;gap:16px}
 .welcome .logo-card{background:#fff;border-radius:22px;padding:14px 18px;align-self:center;box-shadow:0 6px 24px rgba(10,40,70,.12);border:1px solid var(--line)}
@@ -230,6 +234,13 @@ a.btn{text-decoration:none;text-align:center}
 .creditbar .pro{color:var(--teal);font-weight:700}
 .creditbar button{border:0;background:none;color:var(--blue);font-weight:700;font-size:13px;cursor:pointer;padding:4px 0}
 .plans{display:grid;gap:12px}
+.credit{margin:4px 0 12px}
+.credit .crow{display:flex;justify-content:space-between;align-items:center}
+.credit .plantag{background:var(--teal-soft);color:var(--teal);font-weight:700;font-size:12px;border-radius:999px;padding:2px 10px}
+.credit .cbig{font-size:15px;color:var(--muted);margin:6px 0}
+.credit .cbig span{font-size:34px;font-weight:800;color:var(--fg);margin-right:4px}
+.meter{height:10px;border-radius:999px;background:var(--line);overflow:hidden}
+.meter i{display:block;height:100%;background:var(--teal);border-radius:999px}
 .plan h3{margin:0 0 6px}
 .plan ul{margin:8px 0 0;padding-left:20px}
 .plan.pro{border:2px solid var(--teal)}
@@ -445,8 +456,8 @@ a.btn{text-decoration:none;text-align:center}
     ["What if I have an emergency?", "Do not wait for an app. Go to the nearest eye clinic or hospital right away for sudden vision loss, eye injury, chemical splash or severe pain."],
     ["I am a student. What can I do here?", "Choose Optical Student when you sign up. You get study topics, practice quizzes, clinical cases, an AI tutor and help writing your project, one section at a time."],
     ["Why did the assistant not answer?", "The assistant needs an internet connection and a signed-in account. There is also a daily question limit. Study topics, quizzes and eye care info work without it."],
-    ["What are credits, and what does Pro include?", "Each AI answer uses credits. A chat or tutor question uses 1 credit and a project-writing reply uses 3. Free accounts get 30 credits a day. Pro accounts get 300 credits a day and can save project drafts as a PDF. Credits reset every day."],
-    ["How do I upgrade to Pro?", "Open Upgrade and tap the email button. We reply with the price and payment details. After we confirm your payment we switch your account to Pro."],
+    ["What are credits?", "Every feature is free. Each AI answer uses credits so that everyone gets a fair share. A chat or tutor question uses 1 credit and a project-writing reply uses 3. Free accounts get 30 credits a day. You can see how many you have left on your Profile. When they run out, you can use the AI again after they reset at midnight, Nigeria time."],
+    ["Can I get more credits?", "Open Upgrade and tap the email button. We reply with details about Pro, which gives 300 credits a day."],
     ["Who do I contact for a technical problem?", "Email eyelinkai@gmail.com and tell us what happened and which phone you use. You can also send a message from this screen."]
   ];
 
@@ -1029,8 +1040,8 @@ a.btn{text-decoration:none;text-align:center}
       else done('Press and hold the text to copy');
     });
     d.appendChild(b);
-    var pb = document.createElement('button'); pb.type = 'button'; pb.className = 'copy pdfbtn'; pb.textContent = isPro() ? 'Save as PDF' : 'Save as PDF (Pro)';
-    pb.addEventListener('click', function(){ if (!isPro()) return go('upgrade'); savePdf('Eyelink AI project draft', [d.querySelector('.t').textContent]); });
+    var pb = document.createElement('button'); pb.type = 'button'; pb.className = 'copy'; pb.textContent = 'Save as PDF';
+    pb.addEventListener('click', function(){ savePdf('Eyelink AI project draft', [d.querySelector('.t').textContent]); });
     d.appendChild(pb);
   }
   function savePdf(title, parts){
@@ -1058,10 +1069,9 @@ a.btn{text-decoration:none;text-align:center}
     var bar = $('pdfBar'); if (!bar) return;
     var replies = MODES.project.log.filter(function(x){ return x.role === 'assistant'; });
     if (chatMode !== 'project' || !replies.length) { bar.innerHTML = ''; return; }
-    bar.innerHTML = '<button type="button" class="btn indigo" data-act="pdfAll">Save all replies as PDF'+(isPro() ? '' : ' (Pro)')+'</button>';
+    bar.innerHTML = '<button type="button" class="btn indigo" data-act="pdfAll">Save all replies as PDF</button>';
   }
   R.act_pdfAll = function(){
-    if (!isPro()) return go('upgrade');
     var parts = MODES.project.log.filter(function(x){ return x.role === 'assistant'; }).map(function(x){ return x.content; });
     if (parts.length) savePdf('Eyelink AI project draft', parts);
   };
@@ -1078,7 +1088,6 @@ a.btn{text-decoration:none;text-align:center}
   }
   function drawChips(){
     drawPdfBar(); drawCreditBar();
-    Array.prototype.forEach.call(document.querySelectorAll('.pdfbtn'), function(b){ b.textContent = isPro() ? 'Save as PDF' : 'Save as PDF (Pro)'; });
     var m = MODES[chatMode], list = m.log.length ? m.follow : m.chips;
     $('chips').innerHTML = list.map(function(c){ return '<button type="button" class="chip" data-act="chip" data-arg="'+esc(c)+'">'+esc(c)+'</button>'; }).join('');
   }
@@ -1090,11 +1099,17 @@ a.btn{text-decoration:none;text-align:center}
     if (e.target.id !== 'chatForm') return;
     e.preventDefault(); var v = $('chatInput').value.trim(); if (v) ask(v);
   });
+  function creditsOutMsg(left, cost){
+    var base = cost > 1 && left > 0
+      ? 'A project reply needs ' + cost + ' credits and you have ' + left + ' left today. You can still ask short chat questions (1 credit each), or continue tomorrow.'
+      : 'You have used all your credits for today. Your credits reset at midnight (Nigeria time), so you can continue then. Study topics, quizzes and cases still work.';
+    return base + (isPro() ? '' : ' Need more credits? Open Upgrade.');
+  }
   function aiError(err){
     var st = err && err.context && err.context.status;
     if (st === 404) return 'The assistant is not switched on yet. The study topics, quizzes and eye care info still work.';
     if (st === 401) return 'Your sign-in expired. Please log in again.';
-    if (st === 429) return isPro() ? 'You have used all your credits for today. They reset tomorrow.' : 'You have used all your free credits for today. They reset tomorrow. Upgrade to Pro for more credits.';
+    if (st === 429) return creditsOutMsg(0, 1);
     return 'I could not answer that. Please try again in a moment.';
   }
   function aiDetail(err){
@@ -1108,6 +1123,12 @@ a.btn{text-decoration:none;text-align:center}
   function ask(q){
     if (busy || !sb || !S.session) return;
     var mode = chatMode, m = MODES[mode];
+    var cost = mode === 'project' ? 3 : 1;
+    if (S.credits && (S.credits.limit - S.credits.used) < cost) {
+      $('chatInput').value = '';
+      addMsg('me', q); addMsg('ai', creditsOutMsg(Math.max(S.credits.limit - S.credits.used, 0), cost));
+      return;
+    }
     busy = true; $('chatInput').value = ''; $('chatSend').disabled = true; $('chips').innerHTML = '';
     addMsg('me', q); m.log.push({role:'user', content:q});
     var out = addMsg('ai', 'Thinking…');
@@ -1123,16 +1144,27 @@ a.btn{text-decoration:none;text-align:center}
   }
 
   // ---------- Profile and support ----------
+  function creditCard(){ return '<div id="creditWrap">' + creditInner() + '</div>'; }
+  function creditInner(){
+    var c = S.credits;
+    if (!c) return '<div class="card" style="margin:4px 0 12px"><b>AI credits</b><p class="muted" style="margin:4px 0 0">Your credits could not be loaded. Check your connection and reopen this screen.</p></div>';
+    var left = Math.max(c.limit - c.used, 0), pct = Math.round(left / c.limit * 100);
+    return '<div class="card credit" aria-label="AI credits"><div class="crow"><b>AI credits today</b><span class="plantag">'+(isPro()?'Pro':'Free')+'</span></div>' +
+      '<div class="cbig"><span>'+left+'</span> of '+c.limit+' left</div>' +
+      '<div class="meter" role="progressbar" aria-valuemin="0" aria-valuemax="'+c.limit+'" aria-valuenow="'+left+'"><i style="width:'+pct+'%"></i></div>' +
+      '<p class="muted" style="margin:8px 0 0">A chat or tutor question uses 1 credit. A project reply uses 3. Credits reset at midnight (Nigeria time).</p>' +
+      (isPro() ? '' : '<button class="btn ghost" type="button" data-go="upgrade" style="margin-top:10px">Need more credits?</button>') + '</div>';
+  }
   R.profile = function(){
     var em = S.session ? (S.session.user.email || '') : '';
-    $('s-profile').innerHTML = '<h2>My Profile</h2><div class="card req"><b>'+esc(S.profile.full_name || 'Your name')+'</b><span class="muted">'+esc(em)+'</span></div>' +
+    $('s-profile').innerHTML = '<h2>My Profile</h2><div class="card req"><b>'+esc(S.profile.full_name || 'Your name')+'</b><span class="muted">'+esc(em)+'</span></div>' + creditCard() +
       '<form id="profForm"><label for="pName">Full name<input id="pName" autocomplete="name" maxlength="100" value="'+esc(S.profile.full_name)+'"></label>' +
       '<label for="pPhone">Phone number (with country code)<input id="pPhone" type="tel" autocomplete="tel" maxlength="30" placeholder="+234 800 000 0000" value="'+esc(S.profile.phone)+'"></label>' +
       '<label for="pCity">City or town<input id="pCity" autocomplete="address-level2" maxlength="100" value="'+esc(S.profile.city)+'"></label>' +
       '<p class="muted">Account type: '+(S.role==='student'?'Optical student':'Patient')+'</p>' +
-      '<div class="card" style="margin:4px 0 12px"><b>Plan: '+(isPro()?'Pro':'Free')+'</b>'+(S.credits ? '<p class="muted" style="margin:4px 0 0">'+Math.max(S.credits.limit-S.credits.used,0)+' of '+S.credits.limit+' credits left today</p>' : '')+'<button class="btn ghost" type="button" data-go="upgrade" style="margin-top:10px">'+(isPro()?'View plan':'Upgrade to Pro')+'</button></div>' +
       '<button class="btn primary" type="submit">Save profile</button></form><div id="profMsg" role="status" aria-live="polite"></div>' +
       '<button class="btn ghost" type="button" data-go="support">Help and support</button><button class="btn plain" type="button" data-act="signOut">Log out</button>';
+    loadCredits().then(function(){ var w = $('creditWrap'); if (w && cur.name === 'profile') w.innerHTML = creditInner(); });
   };
   document.addEventListener('submit', function(e){
     if (e.target.id !== 'profForm') return;
@@ -1151,15 +1183,15 @@ a.btn{text-decoration:none;text-align:center}
     var em = S.session ? (S.session.user.email || '') : '';
     var nm = S.profile.full_name || '';
     var c = S.credits, pro = isPro();
-    var link = mailto('Upgrade to Eyelink AI Pro', 'Hello, I would like to upgrade to Pro.\n\nMy name: ' + nm + '\nMy account email: ' + em + '\n');
+    var link = mailto('Upgrade to Eyelink AI Pro', 'Hello, I would like to get Pro credits.\n\nMy name: ' + nm + '\nMy account email: ' + em + '\n');
     $('s-upgrade').innerHTML = sub('Upgrade') +
       (pro ? '<div class="ok">You are on Eyelink AI Pro' + (c && c.until ? ' until ' + esc(c.until) : '') + '. Thank you.</div>' : '') +
-      '<p class="lede">Get more from the AI and save your project drafts.</p><div class="plans">' +
-      '<div class="card plan"><h3>Free'+(!pro?'<span class="badge">Your plan</span>':'')+'</h3><ul><li>30 credits a day</li><li>Ask AI, AI tutor and project help</li><li>Study topics, quizzes and cases</li></ul></div>' +
-      '<div class="card plan pro"><h3>Pro'+(pro?'<span class="badge">Your plan</span>':'')+'</h3><ul><li>300 credits a day</li><li>Save project drafts as PDF</li><li>Everything in Free</li></ul></div></div>' +
-      '<p class="muted">One credit is one chat or tutor question. A project-writing reply uses 3 credits. Credits reset every day.</p>' +
-      (pro ? '' : '<h3>How to upgrade</h3><ol class="muted" style="padding-left:20px;margin:0 0 12px"><li>Tap the button below to email us.</li><li>We reply with the price and payment details.</li><li>After we confirm your payment, we switch your account to Pro.</li></ol>' +
-      '<a class="btn primary" href="'+link+'">Email us to upgrade</a>') +
+      '<p class="lede">Every feature is free. Credits only limit how much you use the AI each day.</p><div class="plans">' +
+      '<div class="card plan"><h3>Free'+(!pro?'<span class="badge">Your plan</span>':'')+'</h3><ul><li>30 credits a day</li><li>Every feature, including Save as PDF</li></ul></div>' +
+      '<div class="card plan pro"><h3>Pro'+(pro?'<span class="badge">Your plan</span>':'')+'</h3><ul><li>300 credits a day</li><li>Everything in Free</li></ul></div></div>' +
+      '<p class="muted">One credit is one chat or tutor question. A project-writing reply uses 3 credits. When your credits finish, you can use the AI again after they reset at midnight (Nigeria time).</p>' +
+      (pro ? '' : '<h3>Need more credits?</h3><ol class="muted" style="padding-left:20px;margin:0 0 12px"><li>Tap the button below to email us.</li><li>We reply with the price and payment details.</li><li>After we confirm your payment, we switch your account to Pro.</li></ol>' +
+      '<a class="btn primary" href="'+link+'">Email us for Pro</a>') +
       '<p class="muted" style="margin-top:12px">Technical problem or a request? Email <b>'+CONTACT+'</b></p>';
   };
 
