@@ -119,6 +119,8 @@ nav.tabs button[aria-current="page"]{color:var(--blue);background:var(--blue-sof
 #s-splash{min-height:100%}
 #s-splash,#s-welcome,#s-login{gap:0}
 #s-splash{min-height:100%}
+#s-splash,#s-welcome,#s-login{gap:0}
+#s-splash{min-height:100%}
 /* welcome / login */
 .pad{padding:20px 16px 28px;display:flex;flex-direction:column;gap:16px}
 .welcome .logo-card{background:#fff;border-radius:22px;padding:14px 18px;align-self:center;box-shadow:0 6px 24px rgba(10,40,70,.12);border:1px solid var(--line)}
@@ -355,6 +357,7 @@ a.btn{text-decoration:none;text-align:center}
           <button class="btn primary" type="submit">Save new password</button>
         </form>
         <div id="authMsg" role="status" aria-live="polite"></div>
+        <button class="btn ghost" id="googleBtn" type="button"><b style="font-size:18px">G</b> Continue with Google</button>
         <div class="or"><span>or</span></div>
         <button class="btn ghost" id="modeBtn" type="button">Create New Account</button>
         <button class="btn plain" id="guestBtn" type="button">Continue as Guest</button>
@@ -657,6 +660,14 @@ a.btn{text-decoration:none;text-align:center}
   };
   $('modeBtn').addEventListener('click', function(){ S.authMode = S.authMode === 'up' ? 'in' : 'up'; applyLoginMode(); });
   $('guestBtn').addEventListener('click', function(){ if (!S.role) S.role = 'patient'; ls('eyelink_role', S.role); S.after = null; go('home'); });
+  $('googleBtn').addEventListener('click', function(){
+    if (!sb) return say('authMsg', 'The app could not load its sign-in tools. Refresh the page and try again.');
+    if (!S.role) S.role = 'patient'; ls('eyelink_role', S.role);
+    say('authMsg', 'Opening Google...', true);
+    sb.auth.signInWithOAuth({provider:'google', options:{redirectTo: location.origin + location.pathname}}).then(function(r){
+      if (r && r.error) say('authMsg', 'Google sign-in is not available right now. Please use your email for now.');
+    }).catch(function(){ say('authMsg', 'Google sign-in is not available right now. Please use your email for now.'); });
+  });
   $('pwEye').addEventListener('click', function(){ var i = $('aPass'); i.type = i.type === 'password' ? 'text' : 'password'; });
   $('avatarBtn').addEventListener('click', function(){ go('profile'); });
   $('splashTap').addEventListener('click', leaveSplash);
@@ -715,8 +726,15 @@ a.btn{text-decoration:none;text-align:center}
 
   function loadProfile(){
     if (!sb || !S.session) return Promise.resolve();
-    return sb.from('profiles').select('full_name,phone,city,role').eq('id', S.session.user.id).maybeSingle().then(function(r){
-      if (r.data) {
+    function fetchP(){ return sb.from('profiles').select('full_name,phone,city,role,role_chosen').eq('id', S.session.user.id).maybeSingle(); }
+    return fetchP().then(function(r){
+      if (r && r.data && r.data.role_chosen === false && sb.rpc) {
+        var want = ls('eyelink_role') === 'student' ? 'student' : 'patient';
+        return Promise.resolve(sb.rpc('set_my_role', {p_role: want})).then(fetchP);
+      }
+      return r;
+    }).then(function(r){
+      if (r && r.data) {
         S.profile = {full_name:r.data.full_name||'', phone:r.data.phone||'', city:r.data.city||'', role:r.data.role||'patient'};
         S.role = S.profile.role === 'student' ? 'student' : 'patient'; ls('eyelink_role', S.role);
       }
