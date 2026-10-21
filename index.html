@@ -121,6 +121,8 @@ nav.tabs button[aria-current="page"]{color:var(--blue);background:var(--blue-sof
 #s-splash{min-height:100%}
 #s-splash,#s-welcome,#s-login{gap:0}
 #s-splash{min-height:100%}
+#s-splash,#s-welcome,#s-login{gap:0}
+#s-splash{min-height:100%}
 /* welcome / login */
 .pad{padding:20px 16px 28px;display:flex;flex-direction:column;gap:16px}
 .welcome .logo-card{background:#fff;border-radius:22px;padding:14px 18px;align-self:center;box-shadow:0 6px 24px rgba(10,40,70,.12);border:1px solid var(--line)}
@@ -237,6 +239,9 @@ a.btn{text-decoration:none;text-align:center}
 .creditbar{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:13px;color:var(--muted);margin:2px 0 6px}
 .creditbar .pro{color:var(--teal);font-weight:700}
 .creditbar button{border:0;background:none;color:var(--blue);font-weight:700;font-size:13px;cursor:pointer;padding:4px 0}
+.legal{text-align:center;margin:4px 0 0}
+.legal a,.legalrow a{color:var(--blue)}
+.legalrow{display:flex;gap:16px;justify-content:center;margin:14px 0 4px;font-size:14px}
 .plans{display:grid;gap:12px}
 .credit{margin:4px 0 12px}
 .credit .crow{display:flex;justify-content:space-between;align-items:center}
@@ -361,6 +366,7 @@ a.btn{text-decoration:none;text-align:center}
         <div class="or"><span>or</span></div>
         <button class="btn ghost" id="modeBtn" type="button">Create New Account</button>
         <button class="btn plain" id="guestBtn" type="button">Continue as Guest</button>
+        <p class="muted legal">By continuing you agree to our <a href="terms.html" target="_blank" rel="noopener">Terms</a> and <a href="privacy.html" target="_blank" rel="noopener">Privacy Policy</a>.</p>
       </div>
     </section>
 
@@ -1219,7 +1225,8 @@ a.btn{text-decoration:none;text-align:center}
     $('s-support').innerHTML = sub('Support') + '<p class="lede">Quick answers, or send us a message.</p><div class="list">' +
       FAQ.map(function(f){ return '<details><summary>'+f[0]+'</summary><div class="body"><p>'+f[1]+'</p></div></details>'; }).join('') + '</div><div class="card" style="margin:12px 0"><b>Technical problem or a request?</b><p class="muted" style="margin:6px 0 10px">Email us at '+CONTACT+' and tell us what happened and which phone you use.</p><a class="btn ghost" href="'+mailto('Eyelink AI help', 'Describe your problem or request here.\n\nMy account email: '+(S.session ? (S.session.user.email||'') : '')+'\n')+'">Email '+CONTACT+'</a></div><h3>Send a message</h3>' +
       (S.session ? '<form id="supForm"><label for="sName">Your name<input id="sName" required maxlength="100" value="'+esc(S.profile.full_name)+'"></label><label for="sContact">Phone or email<input id="sContact" required maxlength="120" value="'+esc(S.profile.phone || (S.session.user.email||''))+'"></label><label for="sMsg">How can we help?<textarea id="sMsg" required maxlength="2000"></textarea></label><button class="btn primary" id="supBtn" type="submit">Send message</button></form><div id="supMsg" role="status" aria-live="polite"></div>'
-        : '<div class="card"><p class="muted" style="margin-bottom:10px">Log in so we know where to reply.</p><button class="btn primary" type="button" data-go="login">Log in or create account</button></div>');
+        : '<div class="card"><p class="muted" style="margin-bottom:10px">Log in so we know where to reply.</p><button class="btn primary" type="button" data-go="login">Log in or create account</button></div>') +
+      '<div class="legalrow"><a href="terms.html" target="_blank" rel="noopener">Terms of Use</a><a href="privacy.html" target="_blank" rel="noopener">Privacy Policy</a></div>';
   };
   document.addEventListener('submit', function(e){
     if (e.target.id !== 'supForm') return;
