@@ -123,6 +123,8 @@ nav.tabs button[aria-current="page"]{color:var(--blue);background:var(--blue-sof
 #s-splash{min-height:100%}
 #s-splash,#s-welcome,#s-login{gap:0}
 #s-splash{min-height:100%}
+#s-splash,#s-welcome,#s-login{gap:0}
+#s-splash{min-height:100%}
 /* welcome / login */
 .pad{padding:20px 16px 28px;display:flex;flex-direction:column;gap:16px}
 .welcome .logo-card{background:#fff;border-radius:22px;padding:14px 18px;align-self:center;box-shadow:0 6px 24px rgba(10,40,70,.12);border:1px solid var(--line)}
@@ -468,7 +470,7 @@ a.btn{text-decoration:none;text-align:center}
     ["I am a student. What can I do here?", "Choose Optical Student when you sign up. You get study topics, practice quizzes, clinical cases, an AI tutor and help writing your project, one section at a time."],
     ["Why did the assistant not answer?", "The assistant needs an internet connection and a signed-in account. There is also a daily question limit. Study topics, quizzes and eye care info work without it."],
     ["What are credits?", "Every feature is free. Each AI answer uses credits so that everyone gets a fair share. A chat or tutor question uses 1 credit and a project-writing reply uses 3. Free accounts get 30 credits a day. You can see how many you have left on your Profile. When they run out, you can use the AI again after they reset at midnight, Nigeria time."],
-    ["Can I get more credits?", "Open Upgrade and tap the email button. We reply with details about Pro, which gives 300 credits a day."],
+    ["Can I get more credits?", "Open Upgrade and tap Pay. Pro costs $3 a month and gives 300 credits a day. Pay with the same email you use to log in, then tap I have paid, refresh."],
     ["Who do I contact for a technical problem?", "Email eyelinkai@gmail.com and tell us what happened and which phone you use. You can also send a message from this screen."]
   ];
 
@@ -564,6 +566,7 @@ a.btn{text-decoration:none;text-align:center}
   // ---------- State ----------
   var S = {role: ls('eyelink_role') === 'student' ? 'student' : (ls('eyelink_role') === 'patient' ? 'patient' : null), session:null, profile:{full_name:'', phone:'', city:'', role:'patient'}, authMode:'in', after:null, prefill:'', loaded:false, credits:null};
   var CONTACT = 'eyelinkai@gmail.com';
+  var PAY_LINK = 'https://flutterwave.com/pay/dcjpyhktynst';
   function isPro(){ return !!(S.credits && S.credits.plan === 'pro'); }
   function mailto(subject, body){ return 'mailto:' + CONTACT + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body); }
   function loadCredits(){
@@ -1214,11 +1217,25 @@ a.btn{text-decoration:none;text-align:center}
       (pro ? '<div class="ok">You are on Eyelink AI Pro' + (c && c.until ? ' until ' + esc(c.until) : '') + '. Thank you.</div>' : '') +
       '<p class="lede">Every feature is free. Credits only limit how much you use the AI each day.</p><div class="plans">' +
       '<div class="card plan"><h3>Free'+(!pro?'<span class="badge">Your plan</span>':'')+'</h3><ul><li>30 credits a day</li><li>Every feature, including Save as PDF</li></ul></div>' +
-      '<div class="card plan pro"><h3>Pro'+(pro?'<span class="badge">Your plan</span>':'')+'</h3><ul><li>300 credits a day</li><li>Everything in Free</li></ul></div></div>' +
+      '<div class="card plan pro"><h3>Pro'+(pro?'<span class="badge">Your plan</span>':'')+'</h3><ul><li>300 credits a day</li><li>Everything in Free</li><li>$3 a month</li></ul></div></div>' +
       '<p class="muted">One credit is one chat or tutor question. A project-writing reply uses 3 credits. When your credits finish, you can use the AI again after they reset at midnight (Nigeria time).</p>' +
-      (pro ? '' : '<h3>Need more credits?</h3><ol class="muted" style="padding-left:20px;margin:0 0 12px"><li>Tap the button below to email us.</li><li>We reply with the price and payment details.</li><li>After we confirm your payment, we switch your account to Pro.</li></ol>' +
-      '<a class="btn primary" href="'+link+'">Email us for Pro</a>') +
+      (pro ? '<button class="btn ghost" type="button" data-act="paid">Refresh my plan</button>' :
+        (S.session ?
+          '<div class="card" style="margin:12px 0"><b>Pro: $3 a month</b><p class="muted" style="margin:6px 0 10px">Pay by card (or other options shown) on the secure Flutterwave page. At checkout use this same email so we can find your account:</p><p style="margin:0 0 10px"><b>'+esc(em)+'</b></p>' +
+          '<a class="btn primary" id="payBtn" href="'+PAY_LINK+'" target="_blank" rel="noopener">Pay $3 with card</a>' +
+          '<p class="muted" style="margin:10px 0">Pro switches on within a minute or two after payment. Each payment gives 30 days.</p>' +
+          '<button class="btn ghost" type="button" data-act="paid">I have paid, refresh</button><div id="payMsg" role="status" aria-live="polite"></div></div>'
+        : '<div class="card"><p class="muted" style="margin-bottom:10px">Log in first, so we know which account to upgrade.</p><button class="btn primary" type="button" data-go="login">Log in or create account</button></div>') +
+        '<p class="muted">Paid but still on Free? Email us with your payment receipt: <a href="'+link+'">'+CONTACT+'</a></p>') +
       '<p class="muted" style="margin-top:12px">Technical problem or a request? Email <b>'+CONTACT+'</b></p>';
+  };
+
+  R.act_paid = function(){
+    say('payMsg', 'Checking...', true);
+    loadCredits().then(function(){
+      if (isPro()) { go('upgrade'); return; }
+      R.upgrade(); say('payMsg', 'Not active yet. It can take a minute or two after payment. Try again shortly.');
+    });
   };
 
   R.support = function(){
