@@ -1,6 +1,6 @@
 // Eyelink AI offline helper. It only keeps copies of this site's own pages and icons.
 // Sign-in, the database and the AI are never cached, so they always use the live connection.
-var VERSION = 'eyelink-v1';
+var VERSION = 'eyelink-v2';
 var SHELL = ['./', 'index.html', 'icon-192.png', 'icon-512.png', 'manifest.webmanifest'];
 
 self.addEventListener('install', function (e) {
