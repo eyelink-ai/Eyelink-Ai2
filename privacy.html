@@ -28,7 +28,7 @@ a{color:var(--blue)}
 <li><b>Account details:</b> your email address and your password. Your password is handled by our sign-in service and we cannot see it.</li>
 <li><b>Google sign-in:</b> if you choose Continue with Google, we receive only your name and email address from Google.</li>
 <li><b>Profile:</b> your name, phone number and city (optional), and whether you are a patient or an optical student.</li>
-<li><b>Appointment requests:</b> the clinic, service, date, time, your name, phone number, city and any note you write.</li>
+<li><b>Appointment requests:</b> the clinic, service, date, time, your name, phone number, city and any note you write. Each request gets a booking ID. We also keep its status (pending, confirmed, rejected, attended, cancelled or rescheduled), any message from the clinic, and whether the clinic recorded your visit and whether you confirmed that you attended.</li>
 <li><b>Support messages:</b> your name, contact details and the message you send us.</li>
 <li><b>Study activity:</b> quiz scores that you choose to save.</li>
 <li><b>AI use:</b> how many AI credits you use each day, so we can keep usage fair.</li>
@@ -50,7 +50,8 @@ a{color:var(--blue)}
 
 <h2>Who can see it</h2>
 <ul>
-<li><b>The clinic you choose</b> sees the details of the appointment request you send to it.</li>
+<li><b>The clinic you choose</b> sees the details of the appointment request you send to it, including your name and phone number. Clinic staff can see only the requests made to their own clinic.</li>
+<li><b>Eyelink AI administrators</b> can see appointment requests, their status and attendance records. We use them to monitor referrals, check that visits really took place and prepare monthly reports and referral fees that clinics owe us. Reports show booking IDs, not patient names.</li>
 <li><b>Service providers</b> that help us run the app: Supabase (database and sign-in, servers in Frankfurt, Germany), GitHub (website hosting), Anthropic (AI answers), Google (Google sign-in) and Gmail (sending emails).</li>
 <li>Each account can read only its own records. Other users cannot see your appointments, scores or messages.</li>
 </ul>
